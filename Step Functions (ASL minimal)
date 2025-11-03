@@ -1,0 +1,12 @@
+{
+  "Comment": "Intelligent Doc Pipeline",
+  "StartAt": "TextractStart",
+  "States": {
+    "TextractStart": { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": {"FunctionName": "textract_start", "Payload.$": "$"}, "ResultSelector": {"Payload.$": "$.Payload"}, "ResultPath": "$", "Next": "TextractGet" },
+    "TextractGet":   { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": {"FunctionName": "textract_get",   "Payload.$": "$"}, "ResultSelector": {"Payload.$": "$.Payload"}, "ResultPath": "$", "Next": "Comprehend" },
+    "Comprehend":    { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": {"FunctionName": "comprehend",      "Payload.$": "$"}, "ResultSelector": {"Payload.$": "$.Payload"}, "ResultPath": "$", "Next": "SageMaker" },
+    "SageMaker":     { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": {"FunctionName": "sagemaker_invoke","Payload.$": "$"}, "ResultSelector": {"Payload.$": "$.Payload"}, "ResultPath": "$", "Next": "Bedrock" },
+    "Bedrock":       { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": {"FunctionName": "bedrock_summarize","Payload.$": "$"}, "ResultSelector": {"Payload.$": "$.Payload"}, "ResultPath": "$", "Next": "Writer" },
+    "Writer":        { "Type": "Task", "Resource": "arn:aws:states:::lambda:invoke", "Parameters": {"FunctionName": "writer",          "Payload.$": "$"}, "ResultSelector": {"Payload.$": "$.Payload"}, "ResultPath": "$.output", "End": true }
+  }
+}
