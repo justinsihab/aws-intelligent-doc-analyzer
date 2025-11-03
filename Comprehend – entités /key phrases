@@ -1,0 +1,11 @@
+# lambdas/comprehend/handler.py
+import boto3, os
+comprehend = boto3.client("comprehend")
+LANG = os.getenv("LANG","en")
+
+def handler(event, context):
+    txt = event["extracted_text"][:4800]  # limite simple
+    ents = comprehend.detect_entities(Text=txt, LanguageCode=LANG)["Entities"]
+    keys = comprehend.detect_key_phrases(Text=txt, LanguageCode=LANG)["KeyPhrases"]
+    event["entities"] = ents; event["key_phrases"] = keys
+    return event
