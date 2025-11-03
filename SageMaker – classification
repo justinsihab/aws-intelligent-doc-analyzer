@@ -1,0 +1,11 @@
+# lambdas/sagemaker_invoke/handler.py
+import boto3, os, json
+rt = boto3.client("sagemaker-runtime")
+ENDPOINT = os.getenv("SM_ENDPOINT_NAME")
+
+def handler(event, context):
+    payload = json.dumps({"text": event["extracted_text"][:2000]})
+    resp = rt.invoke_endpoint(EndpointName=ENDPOINT, Body=payload, ContentType="application/json")
+    pred = json.loads(resp["Body"].read())
+    event["document_class"] = pred.get("label"); event["class_conf"] = pred.get("score")
+    return event
