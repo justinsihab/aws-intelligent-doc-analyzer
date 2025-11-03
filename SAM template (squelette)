@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Intelligent Document Analyzer
+Parameters:
+  InputBucket: { Type: String }
+  OutputBucket: { Type: String }
+  SMEndpointName: { Type: String }
+  BedrockModelId: { Type: String, Default: anthropic.claude-3-5-sonnet }
+Resources:
+  OrchestratorFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/orchestrator/
+      Handler: handler.handler
+      Runtime: python3.12
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action: [ "states:StartExecution" ]
+              Resource: "*"
+  # … Déclare chaque Lambda avec ses perms (textract:*, comprehend:*, s3:*, sagemaker-runtime:InvokeEndpoint, bedrock:InvokeModel)
+  # … Déclare la StateMachine avec le JSON ASL ci-dessus
+Outputs:
+  PipelineStateMachineArn:
+    Value: !Ref StateMachine
