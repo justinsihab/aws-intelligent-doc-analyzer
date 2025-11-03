@@ -1,0 +1,11 @@
+# lambdas/textract_start/handler.py
+import os, boto3, json, uuid
+textract = boto3.client("textract")
+
+def handler(event, context):
+    s3_bucket = event["bucket"]; s3_key = event["key"]
+    job = textract.start_document_analysis(
+        DocumentLocation={"S3Object": {"Bucket": s3_bucket, "Name": s3_key}},
+        FeatureTypes=["TABLES","FORMS"]
+    )
+    return {"job_id": job["JobId"], "bucket": s3_bucket, "key": s3_key, "doc_id": str(uuid.uuid4())}
