@@ -1,0 +1,14 @@
+# lambdas/bedrock_summarize/handler.py
+import boto3, os, json, textwrap
+bedrock = boto3.client("bedrock-runtime")
+MODEL = os.getenv("BEDROCK_MODEL_ID","anthropic.claude-3-5-sonnet")
+
+def handler(event, context):
+    txt = event["extracted_text"][:6000]
+    sys = "Tu es un assistant qui résume des documents professionnels de manière précise et concise en français."
+    prompt = f"Résume ce document en 5 points, puis donne 3 risques/clauses clés si présents:\n\n{txt}"
+    body = json.dumps({"anthropic_version":"bedrock-2023-05-31","system":sys,"max_tokens":800,"messages":[{"role":"user","content":[{"type":"text","text":prompt}]}]})
+    out = bedrock.invoke_model(modelId=MODEL, body=body)
+    content = json.loads(out["body"].read())["content"][0]["text"]
+    event["summary"] = content
+    return event
