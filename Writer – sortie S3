@@ -1,0 +1,16 @@
+# lambdas/writer/handler.py
+import os, json, boto3
+s3 = boto3.client("s3")
+
+def handler(event, context):
+    out_bucket = os.getenv("OUTPUT_BUCKET")
+    doc_id = event["doc_id"]
+    s3.put_object(Bucket=out_bucket, Key=f"output/{doc_id}/result.json",
+                  Body=json.dumps({
+                    "class": event.get("document_class"),
+                    "confidence": event.get("class_conf"),
+                    "entities": event.get("entities"),
+                    "key_phrases": event.get("key_phrases"),
+                    "summary": event.get("summary")
+                  }, ensure_ascii=False).encode("utf-8"))
+    return {"doc_id": doc_id, "output_key": f"output/{doc_id}/result.json"}
